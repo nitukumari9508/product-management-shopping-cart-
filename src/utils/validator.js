@@ -31,13 +31,17 @@ const isValidEmail = function (email) {
     return emailRegex.test(email);
 }
 
+const isVaildPass = function (str) {
+    const re = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,15}$/;
+    return re.test(str);
+}
 const isValidpincode = function (pincode) {
-    if (typeof pincode !== "Nunber" ) return false;
-    const pincodeRegex = /^[1-9][0-9]{5}$/;
-    return pincodeRegex.test(pincode);
+    // if (!(typeof pincode == "Nunber") ) return false;
+    const reg = /^[0-9]{6}$/;
+    return reg.test(String(pincode));
 };
 
 
-module.exports = { isEmpty, isValidName, isValidEmail, isValidPhone, isValidBody, isValidpincode, }
+module.exports = { isEmpty, isValidName, isValidEmail, isValidPhone, isValidBody, isValidpincode, isVaildPass }
 
 
