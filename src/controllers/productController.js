@@ -1,6 +1,5 @@
 const productModel = require("../models/productModel")
 const validator = require("../utils/validator")
-const currencySymbol = require("currency-symbol-map")
 const config = require("../utils/awsConfig")
 
 const { isValidName, isValidBody, isvalidPrice, isEmpty, isvalidSize, isValidObjectId } = validator
@@ -23,7 +22,7 @@ const createProduct = async function (req, res) {
         if (!isValidName(description))
             return res.status(404).send({ status: false, message: "description should be in string format" });
 
-             if (!isvalidPrice(price))
+        if (!isvalidPrice(price))
             return res.status(404).send({ status: false, message: "Please enter valid value for price" });
         if (!currencyId) return res.status(400).send({ status: false, message: "currencyId is required" })
         if (typeof currencyId !== "string" && currencyId !== 'INR')
@@ -42,7 +41,7 @@ const createProduct = async function (req, res) {
             }
         }
 
-            if (availableSizes) {
+        if (availableSizes) {
             let sizeArr = availableSizes.toUpperCase().split(",")
             for (let i = 0; i < sizeArr.length; i++) {
                 if (!isvalidSize(size[i])) return res.status(400).send({ status: false, message: "Size is not available" })
@@ -53,12 +52,17 @@ const createProduct = async function (req, res) {
         if (findtitle) return res.status(409).send({ status: false, message: "Please enter unique title" })
         const productImage = await config.uploadFile(files[0]);
 
-        
+
         const productData = { title, description, price, currencyId, currencyFormat, style, availableSizes, installments, productImage: productImage }
         const productData1 = await productModel.create(productData)
         return res.status(201).send({ status: true, message: "Success", data: productData1 });
     } catch (error) { return res.status(500).send({ status: false, message: error.message }) }
 }
+
+
+
+
+
 
 const getAllProducts = async function (req, res) {
     try {
@@ -132,6 +136,11 @@ const getAllProducts = async function (req, res) {
     }
 }
 
+
+
+
+
+
 //!..............................................................................
 //fetch products by Id.
 const getProductsById = async function (req, res) {
@@ -154,6 +163,13 @@ const getProductsById = async function (req, res) {
         return res.status(500).send({ status: false, message: "Error is : " + err })
     }
 }
+
+
+
+
+
+
+
 //---------update----------------------------------//
 
 const updateProduct = async function (req, res) {
@@ -195,15 +211,12 @@ const updateProduct = async function (req, res) {
                 return res.status(400).send({ status: false, message: "Price is not present in correct format" })
             }
         }
-
         if (files) {
             if (files.length > 0) {
                 let productImg = await uploadFile(files[0]);
                 data.productImage = productImg;
             }
         }
-
-
         if (style) {
             if (!isEmpty(style)) return res.status(400).send({ status: false, message: "Style is not valid" })
         }
@@ -231,6 +244,13 @@ const updateProduct = async function (req, res) {
         return res.status(500).send({ status: "false", message: error.message })
     }
 }
+
+
+
+
+
+
+
 //----------------------delete-----------------///
 const deleteById = async function (req, res) {
     try {
