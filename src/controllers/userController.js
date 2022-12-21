@@ -1,10 +1,10 @@
 const userModel = require('../models/userModel')
-const jwt=require("jsonwebtoken")
+const jwt = require("jsonwebtoken")
 const config = require("../utils/awsConfig")
 const bcrypt = require('bcrypt')
 const validator = require("../utils/validator")
-
-//const { isValidObjectId } = mongoose
+const mongoose = require("mongoose")
+const { isValidObjectId } = mongoose
 
 const { isEmpty, isValidName, isValidEmail, isValidPhone, isValidBody, isValidpincode, isVaildPass } = validator
 

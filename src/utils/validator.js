@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+
 
 const isEmpty = function (value) {
     if (typeof value === "undefined" || value === null) return false;
@@ -31,39 +31,17 @@ const isValidEmail = function (email) {
     return emailRegex.test(email);
 }
 
+const isVaildPass = function (str) {
+    const re = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,15}$/;
+    return re.test(str);
+}
 const isValidpincode = function (pincode) {
-    
+    // if (!(typeof pincode == "Nunber") ) return false;
     const reg = /^[0-9]{6}$/;
     return reg.test(String(pincode));
 };
 
 
-
-const isValidInstallment = function isInteger(value) {
-    if (value < 0) return false
-    if (value % 1 == 0) return true;
-}
-
-const isValidObjectId = function(objectId) {
-    return mongoose.Types.ObjectId.isValid(objectId)
-}
-
-const isvalidQuantity = function isInteger(value) {
-    if (value < 1) return false
-    if (isNaN(Number(value))) return false
-    if (value % 1 == 0) return true
-}
-const isvalidPrice = function (price) {
-    return /^\d{0,8}(\.\d{1,2})?$/.test(String(price));
-  };
-  const isvalidSize = function (size) {
-    return ["S", "XS", "M", "X", "L", "XXL", "XL"].includes(size);
-  };
-  const isVaildPass = function (str) {
-    const re = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,15}$/;
-    return re.test(str);
-}
-  
-module.exports = { isVaildPass,isvalidSize,isvalidPrice, isEmpty,isValidName, isValidEmail, isValidPhone, isValidBody, isValidpincode,isValidInstallment,isValidObjectId ,isvalidQuantity}
+module.exports = { isEmpty, isValidName, isValidEmail, isValidPhone, isValidBody, isValidpincode, isVaildPass }
 
 
