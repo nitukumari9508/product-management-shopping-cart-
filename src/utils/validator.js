@@ -33,9 +33,32 @@ const isValidpincode = function (pincode) {
     return pincodeRegex.test(pincode);
 };
 
+const isValidInstallment = function isInteger(value) {
+    if (value < 0) return false
+    if (value % 1 == 0) return true;
+}
 
+const isValidObjectId = function(objectId) {
+    return mongoose.Types.ObjectId.isValid(objectId)
+}
 
-
-module.exports = { isEmpty, isValidName, isValidEmail, isValidPhone, isValidBody, isValidpincode, }
+const isvalidQuantity = function isInteger(value) {
+    if (value < 1) return false
+    if (isNaN(Number(value))) return false
+    if (value % 1 == 0) return true
+}
+//const isValidprice = function (price) {
+   // if (typeof price !== "Number" ) return false;
+    //const priceRegex = /^(\d{1,2})(,\d{2})*(,\d{1,3}){1}(\.\d{1,})?$/g;
+    //return priceRegex.test(price);
+//}
+const isvalidPrice = function (price) {
+    return /^\d{0,8}(\.\d{1,2})?$/.test(String(price));
+  };
+  const isvalidSize = function (size) {
+    return ["S", "XS", "M", "X", "L", "XXL", "XL"].includes(size);
+  };
+  
+module.exports = { isvalidSize,isvalidPrice, isEmpty,isValidName, isValidEmail, isValidPhone, isValidBody, isValidpincode,isValidInstallment,isValidObjectId ,isvalidQuantity}
 
 
