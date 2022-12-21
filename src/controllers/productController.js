@@ -3,11 +3,7 @@ const validator = require("../utils/validator")
 const currencySymbol = require("currency-symbol-map")
 const config = require("../utils/awsConfig")
 
-const { isValidName, isValidBody, isvalidPrice, isEmpty,isvalidSize,isValidObjectId } = validator
-
-
-
-
+const { isValidName, isValidBody, isvalidPrice, isEmpty, isvalidSize, isValidObjectId } = validator
 
 const createProduct = async function (req, res) {
     try {
@@ -27,10 +23,7 @@ const createProduct = async function (req, res) {
         if (!isValidName(description))
             return res.status(404).send({ status: false, message: "description should be in string format" });
 
-
-
-       // if (!price) return res.status(400).send({ status: false, message: "price is required" })
-        if (!isvalidPrice(price))
+             if (!isvalidPrice(price))
             return res.status(404).send({ status: false, message: "Please enter valid value for price" });
         if (!currencyId) return res.status(400).send({ status: false, message: "currencyId is required" })
         if (typeof currencyId !== "string" && currencyId !== 'INR')
@@ -40,27 +33,30 @@ const createProduct = async function (req, res) {
         if (!currencyFormat) return res.status(400).send({ status: false, message: "currencyFormat is required" })
         if (typeof currencyFormat !== "string" && currencyFormat !== "₹")
             return res.status(404).send({ status: false, message: "Please enter price in INR" });
-            
-        if (!isEmpty(style))return res.status(404).send({ status: false, message: "Please enter valid style" });
 
-       // if (typeof installments !== "number")
-         //   return res.status(404).send({ status: false, message: "Please enter numeric value" });
+        if (!isEmpty(style)) return res.status(404).send({ status: false, message: "Please enter valid style" });
 
+        if (installments) {
+            if (! typeof data.installments == Number) {
+                return res.status(400).send({ status: false, message: "Installments should in correct format" })
+            }
+        }
 
-
-
-
-       // if (availableSizes != "S" && availableSizes != "XS" && availableSizes != "M" && availableSizes != "X" && availableSizes != "L" && availableSizes != "XXL" && availableSizes != "XXL" && availableSizes != "XL")
-
+            if (availableSizes) {
+            let sizeArr = availableSizes.toUpperCase().split(",")
+            for (let i = 0; i < sizeArr.length; i++) {
+                if (!isvalidSize(size[i])) return res.status(400).send({ status: false, message: "Size is not available" })
+            }
+            data.availableSizes = sizeArr;
+        }
         const findtitle = await productModel.findOne({ title, isDeleted: false })
-        if (findtitle) return res.status(409).send({ status: false, message: "Please enter unique title" });
-            //----------uploadfiles----------//
-             const productImage = await config.uploadFile(files[0]);
+        if (findtitle) return res.status(409).send({ status: false, message: "Please enter unique title" })
+        const productImage = await config.uploadFile(files[0]);
 
-        //data.profileImage = profileImage
-      const  productData = {title, description, price, currencyId, currencyFormat, style, availableSizes, installments,productImage:productImage}
-      const  productData1 = await productModel.create(productData)
-        return res.status(201).send({ status: true, message: "Success", data: productData1});
+        
+        const productData = { title, description, price, currencyId, currencyFormat, style, availableSizes, installments, productImage: productImage }
+        const productData1 = await productModel.create(productData)
+        return res.status(201).send({ status: true, message: "Success", data: productData1 });
     } catch (error) { return res.status(500).send({ status: false, message: error.message }) }
 }
 
@@ -91,9 +87,10 @@ const getAllProducts = async function (req, res) {
                     return res.status(400).send({ status: false, message: `priceGreaterThan should be a valid number` })
 
 
-                if (!filterQuery.hasOwnproperty('price')){
+                if (!filterQuery.hasOwnproperty('price')) {
                     filterQuery['price'] = {}
-                filterQuery['price']['$gte'] = Number(priceGreaterThan)}
+                    filterQuery['price']['$gte'] = Number(priceGreaterThan)
+                }
                 //console.log(typeof Number(priceGreaterThan))
             }
 
@@ -236,19 +233,19 @@ const updateProduct = async function (req, res) {
 }
 //----------------------delete-----------------///
 const deleteById = async function (req, res) {
-    try{
-    const productId = req.params.Id
+    try {
+        const productId = req.params.Id
 
-    const productData = await productModel.findById(productId)
+        const productData = await productModel.findById(productId)
 
-    if (!productData) { return res.status(404).send({ msg: "No details exists with this productId" }) }
-    if (productData.isDeleted === true) { return res.status(404).send({ msg: "product is already deleted" }) }
-    let deleteProduct = await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true })
-    res.status(200).send({ status: true, msg: "product is sucessfully deleted",productId:deleteProduct })
-} catch (err) {
-    return res.status(500).send({ status: false, message: "Error is : " + err })
+        if (!productData) { return res.status(404).send({ msg: "No details exists with this productId" }) }
+        if (productData.isDeleted === true) { return res.status(404).send({ msg: "product is already deleted" }) }
+        let deleteProduct = await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true })
+        res.status(200).send({ status: true, msg: "product is sucessfully deleted", productId: deleteProduct })
+    } catch (err) {
+        return res.status(500).send({ status: false, message: "Error is : " + err })
+    }
+
 }
 
-}
-
-module.exports = { getProductsById, getAllProducts, createProduct,deleteById,updateProduct}
+module.exports = { getProductsById, getAllProducts, createProduct, deleteById, updateProduct }
