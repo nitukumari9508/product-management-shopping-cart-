@@ -91,18 +91,19 @@ const getAllProducts = async function (req, res) {
                 $options: 'i'
             }
         }
+        if (priceGreaterThan || priceLessThan) {
+            filterQuery.price = {}
 
-        filterQuery.price = {}
+            if (isEmpty(priceLessThan)) {
+                if (!isvalidPrice(priceLessThan)) return res.status(404).send({ status: false, message: "Please enter valid price" });
+                filterQuery.price[`$lte`] = priceLessThan
+            }
 
-        if (isEmpty(priceLessThan)) {
-            if (!isvalidPrice(priceLessThan)) return res.status(404).send({ status: false, message: "Please enter valid price" });
-            filterQuery.price[`$lte`] = priceLessThan
-        }
+            if (isEmpty(priceGreaterThan)) {
+                if (!isvalidPrice(priceGreaterThan)) return res.status(404).send({ status: false, message: "Please enter valid price" });
+                filterQuery.price[`$gte`] = priceGreaterThan
 
-        if (isEmpty(priceGreaterThan)) {
-            if (!isvalidPrice(priceGreaterThan)) return res.status(404).send({ status: false, message: "Please enter valid price" });
-            filterQuery.price[`$gte`] = priceGreaterThan
-
+            }
         }
 
         //sorting the products acc. to prices => 1 for ascending & -1 for descending.
@@ -247,7 +248,7 @@ const deleteById = async function (req, res) {
     try {
         const productId = req.params.productId
 
-        if(!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "invalide Product id" })
+        if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "invalide Product id" })
         const productData = await productModel.findById(productId)
         if (!productData) { return res.status(404).send({ msg: "No details exists with this productId" }) }
         if (productData.isDeleted) { return res.status(404).send({ msg: "product is already deleted" }) }
