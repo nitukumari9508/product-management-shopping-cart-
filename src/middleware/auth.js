@@ -2,46 +2,55 @@ const jwt = require('jsonwebtoken')
 const { isValidObjectId } = require('mongoose')
 const userModel = require('../models/userModel')
 
-const authentication = function (req, res, next) {
 
+
+const authentication = async function (req, res, next) {
     try {
+        let bearerHeader = req.headers.authorization;
+        if (!bearerHeader) return res.status(400).send({ status: false, Error: "Enter Token In BearerToken !!!" });
 
-    let token = req.headers["x-api-key"]
+        const bearer = bearerHeader.split(" ");
+        const Token = bearer[1];
 
-    if (!token) return res.status(400).send({ status : false, message : "Token must be present !!!" })
 
-    jwt.verify(token, "NAFS" , function (err, decodedToken) {
-        if (err) return res.status(401).send({ status : false , message : "Token is invalid !!!" })
-        req.loggedInUser = decodedToken.userId
-        next()
-    })
+        if (!Token) return res.status(403).send({ status: false, message: "invalid token" });
 
-} catch (err){
-    res.status(500).send({ status : false , message : err.message })
-}
-}
+
+        jwt.verify(Token, "NAFS", function (err, decodedToken) {
+            if (err) {
+                return res.status(401).send({ status: false, message: "Authentication Failed" });
+            } else {
+                req.decodedToken = decodedToken;
+                next();
+            }
+        });
+    } catch (err) {
+
+        return res.status(500).send({ msg: err.message });
+    }
+};
+
+//----------------Authorization------------------//
 
 const authorization = async function (req, res, next) {
-
     try {
+        let userLoggedIn = req.decodedToken;
+        let userId = req.params.userId;
 
-    let userId = req.params.userId
 
-    if(userId){
+        if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "userId is invalid" });
+        const userData = await userModel.findById(userId)
+        if (!userData) return res.status(404).send({ status: false, msg: "user not Found in Database" })
+        if (userData.isDeleted) return res.status(400).send({ status: false, msg: "user is allrady deleated form Database" })
 
-        if(!isValidObjectId(userId)) return res.status(400).send({ status : false , message : "UserId id not valid ObjectId !!!" })
 
-        let user = await userModel.findById(userId)
-        if (!user) return res.status(404).send({ status : false , message : "User not found !!!" })
+        if (userId !== userLoggedIn.userId) return res.status(403).send({ status: false, msg: "Error, authorization failed" });
 
-        if(userId != req.loggedInUser) return res.status(403).send({ status : false , message : "Not Authorized !!!" })    
-    }
-
-    next()
+        next();
 
     } catch (err) {
-        return res.status(500).send({ status : false , error : err.message })
+        res.status(500).send({ status: false, error: err.message });
     }
-}
+};
 
-module.exports = { authentication , authorization }
+module.exports = { authentication, authorization };
