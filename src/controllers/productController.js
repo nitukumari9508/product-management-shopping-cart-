@@ -26,11 +26,11 @@ const createProduct = async function (req, res) {
         if (!isvalidPrice(price)) return res.status(404).send({ status: false, message: "Please enter valid value for price" });
 
         if (!currencyId) return res.status(400).send({ status: false, message: "currencyId is required" })
-        if (typeof currencyId !== "string" && currencyId !== 'INR') return res.status(404).send({ status: false, message: "Please enter price in INR" });
+        if (currencyId !== 'INR') return res.status(404).send({ status: false, message: "Please enter price in INR" });
 
 
         if (!currencyFormat) return res.status(400).send({ status: false, message: "currencyFormat is required" })
-        if (typeof currencyFormat !== "string" && currencyFormat !== "₹") return res.status(404).send({ status: false, message: "Please enter price in INR" });
+        if (currencyFormat !== "₹") return res.status(404).send({ status: false, message: "Please currencyFormat ₹ " });
 
         if (style) {
             if (!isEmpty(style)) return res.status(404).send({ status: false, message: "Please enter valid style" });
@@ -54,10 +54,10 @@ const createProduct = async function (req, res) {
         if (files.length === 0) return res.status(400).send({ status: false, message: "Product Image is mandatory" })
         if (!isVaildfile(files[0].originalname)) return res.status(400).send({ status: false, message: "product image file is not valid" })
         const productImage = await config.uploadFile(files[0]);
+        data.productImage = productImage
 
-
-        const productData = { title, description, price, currencyId, currencyFormat, style, availableSizes, installments, productImage: productImage, availableSizes: data.availableSizes }
-        const productData1 = await productModel.create(productData)
+        
+        const productData1 = await productModel.create(data)
         return res.status(201).send({ status: true, message: "Success", data: productData1 });
 
     } catch (error) {
@@ -213,13 +213,13 @@ const updateProduct = async function (req, res) {
         }
 
         if (price) {
-            if (!isValidPrice(price)) {
+            if (!isvalidPrice(price)) {
                 return res.status(400).send({ status: false, message: "Price is not present in correct format" })
             }
         }
         if (files) {
             if (files.length === 0) return res.status(400).send({ status: false, message: "Product Image is mandatory" })
-            if (!isVaildfile(files.originalname)) return res.status(400).send({ status: false, message: "product image file is not valid" })
+            if (!isVaildfile(files[0].originalname)) return res.status(400).send({ status: false, message: "product image file is not valid" })
             const productImage = await config.uploadFile(files[0]);
             data.productImage = productImage
 
@@ -244,7 +244,7 @@ const updateProduct = async function (req, res) {
             }
         }
 
-        const updatedProduct = await productModel.findByIdAndUpdate({ _id: productId }, data, { new: true })
+        const updatedProduct = await productModel.findOneAndUpdate({ _id: productId }, data, { new: true })
         return res.status(200).send({ status: true, message: "Product Updated Successfully", data: updatedProduct })
 
     } catch (error) {

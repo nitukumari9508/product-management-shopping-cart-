@@ -17,6 +17,12 @@ router.put("/user/:userId/profile", userController.updateUser)
 
 router.post("/products",productController.createProduct)
 
+router.put ("/products/:productId",productController.updateProduct)
+
+
+
+
+
 router.all("/**", function(req, res){
 res.status(404).send({status:false, message:"your URL is wrong plese check endpoint"})
 })
