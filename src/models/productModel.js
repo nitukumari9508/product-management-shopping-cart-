@@ -1,58 +1,57 @@
 const mongoose = require("mongoose")
 
 const productSchema = new mongoose.Schema({
-    
 
-        title: {
-            type: String, 
-            required: true,
-            unique: true
-            },
 
-        description: {
-            type: String, 
-            required: true
-        },
+    title: {
+        type: String,
+        required: true,
+        unique: true
+    },
 
-        price: {
-            type: Number, 
-            required: true
-        },
+    description: {
+        type: String,
+        required: true
+    },
 
-        currencyId: {
-            type: String,
-            required: true
-        },
-        currencyFormat: {
-            type: String, 
-            required: true, 
-        },
+    price: {
+        type: Number,
+        required: true
+    },
 
-        isFreeShipping: {
-            type: Boolean, 
-            default: false
-        },
+    currencyId: {
+        type: String,
+        required: true
+    },
+    currencyFormat: {
+        type: String,
+        required: true,
+    },
 
-        productImage: {
-            type: String, 
-            required: true
-        }, 
+    isFreeShipping: {
+        type: Boolean,
+        default: false
+    },
 
-        style: {type: String},
+    productImage: {
+        type: String,
+        required: true
+    },
 
-        availableSizes: {
-            type: [String],
+    style: { type: String },
 
-            trim: true,
-            enum: ["S", "XS","M","X", "L","XXL", "XL"]
-        },
+    availableSizes: {
+        type: [String],
+        trim: true,
+        enum: ["S", "XS", "M", "X", "L", "XXL", "XL"]
+    },
 
-        installments: {type: Number},
+    installments: { type: Number },
 
-        deletedAt: {type: Date, default: null },
+    deletedAt: { type: Date, default: null },
 
-        isDeleted: {type: Boolean, default: false}
+    isDeleted: { type: Boolean, default: false }
 
-      }, { timestamps: true });
+}, { timestamps: true });
 
-module.exports= mongoose.model("product",productSchema)
+module.exports = mongoose.model("product", productSchema)

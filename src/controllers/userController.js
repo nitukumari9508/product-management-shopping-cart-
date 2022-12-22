@@ -6,13 +6,14 @@ const validator = require("../utils/validator")
 const mongoose = require("mongoose")
 const { isValidObjectId } = mongoose
 
-const { isEmpty, isValidName, isValidEmail, isValidPhone, isValidBody, isValidpincode, isVaildPass } = validator
+const { isEmpty, isValidName, isValidEmail, isValidPhone, isValidBody, isValidpincode, isVaildPass, isVaildfile } = validator
 
 
 const userCreate = async function (req, res) {
     try {
 
         let files = req.files;
+
         let data = req.body
         const { fname, lname, email, phone, password, address } = data
         if (!fname) return res.status(400).send({ status: false, message: "fname is requires" })
@@ -35,7 +36,6 @@ const userCreate = async function (req, res) {
         if (isPhoneAlreadyUsed) { return res.status(409).send({ status: false, message: `${phone} is already in use, Please try a new phone number.` }) }
 
 
-        if (files.length === 0) return res.status(400).send({ status: false, message: "Profile Image is mandatory" })
         if (!password) return res.status(400).send({ status: false, message: "password is required" })
         if (!isVaildPass(password.trim())) return res.status(400).send({ status: false, msg: "Please provide a valid Password with min 8 to 15 char with Capatial & special (@#$%^!) char " })
 
@@ -63,7 +63,11 @@ const userCreate = async function (req, res) {
         } else
             return res.status(400).send({ status: false, message: "Billing address cannot be empty." })
 
+
+        if (files.length === 0) return res.status(400).send({ status: false, message: "Profile Image is mandatory" })
+        if (!isVaildfile(files.originalname)) return res.status(400).send({ status: false, message: "profile image file is not valide" })
         let profileImage = await config.uploadFile(files[0]); //upload image to AWS
+
         const encryptedPassword = await bcrypt.hash(password, 10) //encrypting password by using bcrypt.
 
         //object destructuring for response body.
@@ -217,11 +221,11 @@ const updateUser = async function (req, res) {
 
         console.log(dataToUpdate)
 
-        let updateData = await userModel.findOneAndUpdate({ _id: userId }, 
+        let updateData = await userModel.findOneAndUpdate({ _id: userId },
             { $set: { fname: dataToUpdate.fname, lname: dataToUpdate.lname, email: dataToUpdate.email, phone: dataToUpdate.phone, password: dataToUpdate.password, address: dataToUpdate.address, profileImage: dataToUpdate.profileImage } }
             , { new: true });
 
-            
+
         return res.status(200).send({ status: true, message: "User profile updated", data: updateData });
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message });

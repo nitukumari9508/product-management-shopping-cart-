@@ -15,6 +15,8 @@ router.get("/user/:userId/profile", userController.userById)
 
 router.put("/user/:userId/profile", userController.updateUser)
 
+router.post("/products",productController.createProduct)
+
 router.all("/**", function(req, res){
 res.status(404).send({status:false, message:"your URL is wrong plese check endpoint"})
 })

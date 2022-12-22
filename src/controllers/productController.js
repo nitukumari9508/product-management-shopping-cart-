@@ -2,7 +2,7 @@ const productModel = require("../models/productModel")
 const validator = require("../utils/validator")
 const config = require("../utils/awsConfig")
 
-const { isValidName, isValidBody, isvalidPrice, isEmpty, isvalidSize, isValidObjectId } = validator
+const { isValidName, isValidBody, isvalidPrice, isEmpty, isvalidSize, isValidObjectId, isVaildfile } = validator
 
 const createProduct = async function (req, res) {
     try {
@@ -14,26 +14,27 @@ const createProduct = async function (req, res) {
         const { title, description, price, currencyId, currencyFormat, style, availableSizes, installments } = data
 
         if (!title) return res.status(400).send({ status: false, message: "title is required" })
-        if (!isValidName(title))
-            return res.status(404).send({ status: false, message: "title should be in string format" });
+        if (!isEmpty(title)) return res.status(404).send({ status: false, message: "title should be in string format" });
+        const findtitle = await productModel.findOne({ title, isDeleted: false })
+        if (findtitle) return res.status(409).send({ status: false, message: "Please enter unique title" })
 
 
         if (!description) return res.status(400).send({ status: false, message: "description is required" })
-        if (!isValidName(description))
-            return res.status(404).send({ status: false, message: "description should be in string format" });
+        if (!isEmpty(description)) return res.status(404).send({ status: false, message: "description should be in string format" });
 
-        if (!isvalidPrice(price))
-            return res.status(404).send({ status: false, message: "Please enter valid value for price" });
+        if (!price) return res.status(400).send({ status: false, message: "price is required" })
+        if (!isvalidPrice(price)) return res.status(404).send({ status: false, message: "Please enter valid value for price" });
+
         if (!currencyId) return res.status(400).send({ status: false, message: "currencyId is required" })
-        if (typeof currencyId !== "string" && currencyId !== 'INR')
-            return res.status(404).send({ status: false, message: "Please enter price in INR" });
+        if (typeof currencyId !== "string" && currencyId !== 'INR') return res.status(404).send({ status: false, message: "Please enter price in INR" });
 
 
         if (!currencyFormat) return res.status(400).send({ status: false, message: "currencyFormat is required" })
-        if (typeof currencyFormat !== "string" && currencyFormat !== "₹")
-            return res.status(404).send({ status: false, message: "Please enter price in INR" });
+        if (typeof currencyFormat !== "string" && currencyFormat !== "₹") return res.status(404).send({ status: false, message: "Please enter price in INR" });
 
-        if (!isEmpty(style)) return res.status(404).send({ status: false, message: "Please enter valid style" });
+        if (style) {
+            if (!isEmpty(style)) return res.status(404).send({ status: false, message: "Please enter valid style" });
+        }
 
         if (installments) {
             if (! typeof data.installments == Number) {
@@ -48,15 +49,20 @@ const createProduct = async function (req, res) {
             }
             data.availableSizes = sizeArr;
         }
-        const findtitle = await productModel.findOne({ title, isDeleted: false })
-        if (findtitle) return res.status(409).send({ status: false, message: "Please enter unique title" })
+
+        console.log(files[0].originalname)
+        if (files.length === 0) return res.status(400).send({ status: false, message: "Product Image is mandatory" })
+        if (!isVaildfile(files[0].originalname)) return res.status(400).send({ status: false, message: "product image file is not valid" })
         const productImage = await config.uploadFile(files[0]);
 
 
-        const productData = { title, description, price, currencyId, currencyFormat, style, availableSizes, installments, productImage: productImage }
+        const productData = { title, description, price, currencyId, currencyFormat, style, availableSizes, installments, productImage: productImage, availableSizes: data.availableSizes }
         const productData1 = await productModel.create(productData)
         return res.status(201).send({ status: true, message: "Success", data: productData1 });
-    } catch (error) { return res.status(500).send({ status: false, message: error.message }) }
+
+    } catch (error) {
+        return res.status(500).send({ status: false, message: error.message })
+    }
 }
 
 
@@ -212,10 +218,11 @@ const updateProduct = async function (req, res) {
             }
         }
         if (files) {
-            if (files.length > 0) {
-                let productImg = await uploadFile(files[0]);
-                data.productImage = productImg;
-            }
+            if (files.length === 0) return res.status(400).send({ status: false, message: "Product Image is mandatory" })
+            if (!isVaildfile(files.originalname)) return res.status(400).send({ status: false, message: "product image file is not valid" })
+            const productImage = await config.uploadFile(files[0]);
+            data.productImage = productImage
+
         }
         if (style) {
             if (!isEmpty(style)) return res.status(400).send({ status: false, message: "Style is not valid" })
