@@ -23,7 +23,7 @@ const createProduct = async function (req, res) {
         if (!isEmpty(description)) return res.status(404).send({ status: false, message: "description should be in string format" });
 
         if (!price) return res.status(400).send({ status: false, message: "price is required" })
-        if (!isvalidPrice(price)) return res.status(404).send({ status: false, message: "Please enter valid value for price" });
+        if (!isvalidPrice(price)) return res.status(404).send({ status: false, message: "Please enter valid price" });
 
         if (!currencyId) return res.status(400).send({ status: false, message: "currencyId is required" })
         if (currencyId !== 'INR') return res.status(404).send({ status: false, message: "Please enter price in INR" });
@@ -45,7 +45,7 @@ const createProduct = async function (req, res) {
         if (availableSizes) {
             let sizeArr = availableSizes.toUpperCase().split(",")
             for (let i = 0; i < sizeArr.length; i++) {
-                if (!isvalidSize(size[i])) return res.status(400).send({ status: false, message: "Size is not available" })
+                if (!isvalidSize(size[i])) return res.status(400).send({ status: false, message: "Size is not Valid" })
             }
             data.availableSizes = sizeArr;
         }
@@ -56,7 +56,6 @@ const createProduct = async function (req, res) {
         const productImage = await config.uploadFile(files[0]);
         data.productImage = productImage
 
-        
         const productData1 = await productModel.create(data)
         return res.status(201).send({ status: true, message: "Success", data: productData1 });
 
@@ -72,71 +71,56 @@ const createProduct = async function (req, res) {
 
 const getAllProducts = async function (req, res) {
     try {
-        const filterQuery = { isDeleted: false } //complete object details.
+        const filterQuery = {
+            isDeleted: false
+        }
+
         const queryParams = req.query;
+        const { size, name, priceGreaterThan, priceLessThan, priceSort } = queryParams;
 
-        if (isEmpty(queryParams)) {
-            const { size, name, priceGreaterThan, priceLessThan, priceSort } = queryParams;
+        //validation starts.
+        if (isEmpty(size)) {
+            if (!isvalidSize(size)) return res.status(400).send({ status: false, message: "Size is not valid" })
+            filterQuery.availableSizes = size
+        }
 
-            //validation starts.
-            if (isEmpty(size))
-                filterQuery['availableSizes'] = size
-
-
-            //using $regex to match the subString of the names of products & "i" for case insensitive.
-            if (isEmpty(name)) {
-                filterQuery['title'] = {}
-                filterQuery['title']['$regex'] = name
-                filterQuery['title']['$options'] = 'i'
-            }
-
-            //setting price for ranging the product's price to fetch them.
-            if (isEmpty(priceGreaterThan)) {
-
-                if (!(!isNaN(Number(priceGreaterThan))) && (priceGreaterThan <= 0))
-                    return res.status(400).send({ status: false, message: `priceGreaterThan should be a valid number` })
-
-
-                if (!filterQuery.hasOwnproperty('price')) {
-                    filterQuery['price'] = {}
-                    filterQuery['price']['$gte'] = Number(priceGreaterThan)
-                }
-                //console.log(typeof Number(priceGreaterThan))
-            }
-
-            //setting price for ranging the product's price to fetch them.
-            if (isEmpty(priceLessThan)) {
-
-                if (!(!isNaN(Number(priceLessThan))) && (priceLessThan <= 0))
-                    return res.status(400).send({ status: false, message: `priceLessThan should be a valid number` })
-
-
-                if (!filterQuery.hasOwnProperty('price'))
-                    filterQuery['price'] = {}
-                filterQuery['price']['$lte'] = Number(priceLessThan)
-
-            }
-
-            //sorting the products acc. to prices => 1 for ascending & -1 for descending.
-            if (isEmpty(priceSort)) {
-
-                if (!((priceSort == 1) || (priceSort == -1))) return res.status(400).send({ status: false, message: `priceSort should be 1 or -1 ` })
-                const products = await productModel.find(filterQuery).sort({ price: priceSort })
-
-                if (Array.isArray(products) && products.length === 0)
-                    return res.status(404).send({ productStatus: false, message: 'No Product found' })
-                else return res.status(200).send({ status: true, message: 'Product list', data2: products })
+        //using $regex to match the subString of the names of products & "i" for case insensitive.
+        if (isEmpty(name)) {
+            filterQuery.title = {
+                $regex: name,
+                $options: 'i'
             }
         }
 
-        const products = await productModel.find(filterQuery)
+        filterQuery.price = {}
 
-        //verifying is it an array and having some data in that array.
-        if (Array.isArray(products) && products.length === 0) {
+        if (isEmpty(priceLessThan)) {
+            if (!isvalidPrice(priceLessThan)) return res.status(404).send({ status: false, message: "Please enter valid price" });
+            filterQuery.price[`$lte`] = priceLessThan
+        }
+
+        if (isEmpty(priceGreaterThan)) {
+            if (!isvalidPrice(priceGreaterThan)) return res.status(404).send({ status: false, message: "Please enter valid price" });
+            filterQuery.price[`$gte`] = priceGreaterThan
+
+        }
+
+        //sorting the products acc. to prices => 1 for ascending & -1 for descending.
+        if (priceSort) {
+            // priceSort = Number(priceSort)
+            if (!((priceSort == 1) || (priceSort == -1))) {
+                return res.status(400).send({ status: false, message: `priceSort should be 1 or -1 ` })
+            }
+        }
+
+        const products = await productModel.find(filterQuery).sort({ price: priceSort })
+        if (products.length === 0) {
             return res.status(404).send({ productStatus: false, message: 'No Product found' })
+        } else {
+            return res.status(200).send({ status: true, message: 'Product list', data: products })
         }
 
-        return res.status(200).send({ status: true, message: 'Product list', data: products })
+
     } catch (error) {
         return res.status(500).send({ status: false, error: error.message });
     }
