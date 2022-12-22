@@ -247,10 +247,11 @@ const deleteById = async function (req, res) {
     try {
         const productId = req.params.productId
 
+        if(!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "invalide Product id" })
         const productData = await productModel.findById(productId)
         if (!productData) { return res.status(404).send({ msg: "No details exists with this productId" }) }
-        if (productData.isDeleted === true) { return res.status(404).send({ msg: "product is already deleted" }) }
-        
+        if (productData.isDeleted) { return res.status(404).send({ msg: "product is already deleted" }) }
+
         let deleteProduct = await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true })
         return res.status(200).send({ status: true, msg: "product is sucessfully deleted", productId: deleteProduct })
     } catch (err) {
