@@ -16,15 +16,17 @@ router.get("/user/:userId/profile", userController.userById)
 router.put("/user/:userId/profile", userController.updateUser)
 // -------------------------Products --------------
 
-router.post("/products",productController.createProduct)
+router.post("/products", productController.createProduct)
 
-router.get ("/products",productController.getAllProducts)
+router.get("/products", productController.getAllProducts)
 
-router.get ("/products/:productId",productController.getProductsById)
+router.get("/products/:productId", productController.getProductsById)
 
-router.put ("/products/:productId",productController.updateProduct)
+router.put("/products/:productId", productController.updateProduct)
 
-router.delete("/products/:productId",productController.deleteById)
+router.delete("/products/:productId", productController.deleteById)
 //--------------cart---------------//
-router.post("/users/:userId/cart",cartController.cartData)
+router.post("/users/:userId/cart", cartController.cartData)
+router.get("/users/:userId/cart", cartController.getCart)
+router.delete("/users/:userId/cart", cartController.deleteCart)
 module.exports = router
