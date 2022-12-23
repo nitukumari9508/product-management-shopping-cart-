@@ -3,6 +3,7 @@ const router = Router()
 const userController = require("../controllers/userController")
 const productController = require("../controllers/productController")
 const middleware = require("../middleware/auth")
+const cartController = require("../controllers/cartController")
 
 // -------------------------User --------------
 
@@ -24,6 +25,7 @@ router.get ("/products/:productId",productController.getProductsById)
 router.put ("/products/:productId",productController.updateProduct)
 
 router.delete("/products/:productId",productController.deleteById)
+<<<<<<< HEAD
 
 
 
@@ -32,4 +34,8 @@ router.delete("/products/:productId",productController.deleteById)
 router.all("/**", function(req, res){
 res.status(404).send({status:false, message:"your URL is wrong plese check endpoint"})
 })
+=======
+//--------------cart---------------//
+router.post("/users/:userId/cart",cartController.cartData)
+>>>>>>> testing
 module.exports = router

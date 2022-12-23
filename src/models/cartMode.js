@@ -23,6 +23,7 @@ const cartSchema = new mongoose.Schema(
                     type: Number,
                     required: true,
                     trim: true,
+                    default:1
                 },
             },
         ],
