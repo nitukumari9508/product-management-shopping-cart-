@@ -25,17 +25,6 @@ router.get ("/products/:productId",productController.getProductsById)
 router.put ("/products/:productId",productController.updateProduct)
 
 router.delete("/products/:productId",productController.deleteById)
-<<<<<<< HEAD
-
-
-
-
-
-router.all("/**", function(req, res){
-res.status(404).send({status:false, message:"your URL is wrong plese check endpoint"})
-})
-=======
 //--------------cart---------------//
 router.post("/users/:userId/cart",cartController.cartData)
->>>>>>> testing
 module.exports = router
