@@ -51,7 +51,7 @@ const isValidObjectId = function (objectId) {
 const isvalidQuantity = function isInteger(value) {
     if (value < 1) return false
     if (isNaN(Number(value))) return false
-    if (value % 1 == 0) return true
+    if (value > 0) return true
 }
 const isvalidPrice = function (price) {
     return /^\d{0,8}(\.\d{1,2})?$/.test(String(price));

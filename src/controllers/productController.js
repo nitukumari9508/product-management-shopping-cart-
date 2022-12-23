@@ -172,10 +172,10 @@ const updateProduct = async function (req, res) {
 
         if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "ProductId is not valid" })
 
-        const findProduct = await productModel.findById({ _id: productId })
-        if (!findProduct) return res.status(404).send({ status: false, message: " Product not found" })
+        const product = await productModel.findById({ _id: productId })
+        if (!product) return res.status(404).send({ status: false, message: " Product not found" })
 
-        if (findProduct.isDeleted == true) return res.status(404).send({ status: false, message: "Product is deleted allredy" })
+        if (product.isDeleted == true) return res.status(404).send({ status: false, message: "Product is deleted allredy" })
 
 
         if (Object.keys(data).length == 0) {
