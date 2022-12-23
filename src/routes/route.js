@@ -2,6 +2,7 @@ const { Router } = require('express')
 const router = Router()
 const userController = require("../controllers/userController")
 const productController = require("../controllers/productController")
+const cartController = require("../controllers/cartController")
 
 router.get('/test', function(req,res){
     res.send("Hello World")
@@ -20,4 +21,6 @@ router.get("/products",productController.getAllProducts)
 router.get("/products/:productId",productController.getProductsById)
 router.put("/products/:productId",productController.updateProduct)
 router.delete("/products/:productId",productController.deleteById)
+//--------------cart---------------//
+router.post("/users/:userId/cart",cartController.cartData)
 module.exports = router
