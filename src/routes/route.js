@@ -4,6 +4,7 @@ const userController = require("../controllers/userController")
 const productController = require("../controllers/productController")
 const middleware = require("../middleware/auth")
 const cartController = require("../controllers/cartController")
+const orderControlar = require("../controllers/orderControlar")
 
 // -------------------------User --------------
 
@@ -36,6 +37,9 @@ router.get("/users/:userId/cart", cartController.getCart)
 
 router.delete("/users/:userId/cart", cartController.deleteCart)
 
+// -----------order---------//
+
+router.post("/users/:userId/orders", orderControlar.createOrder)
 
 
 
