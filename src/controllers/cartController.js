@@ -165,22 +165,20 @@ const updateCart = async function (req, res) {
 
         }
         let itemsArr = existingcart.items
-        for (i in itemsArr) {
+        for (let i =0; i<itemsArr.length; i++) {
             if (itemsArr[i].productId.toString() === productId) {
+             
                 if (itemsArr[i].quantity < removeProduct) {
                     return res.status(400).send({ status: false, msg: `There are only ${itemsArr[i].quantity} products` })
                 }
                 
                 itemsArr[i].quantity -= removeProduct
 
-                if (itemsArr[i].quantity == removeProduct) {
-                    itemsArr = itemsArr.slice(i)
+                if (itemsArr[i].quantity == 0) {
+                  itemsArr.splice(i,1)
                 }
 
-
-
                 let responseData = await cartModel.findOneAndUpdate({ _id: cartId }, { $set: { items: itemsArr, totalPrice: price, totalItems: itemsArr.length } }, { new: true })
-
                 return res.status(200).send({ status: true, message: `Product added successfully`, data: responseData })
 
             }
