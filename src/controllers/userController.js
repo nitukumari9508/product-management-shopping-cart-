@@ -15,7 +15,10 @@ const userCreate = async function (req, res) {
         let files = req.files;
 
         let data = req.body
-        const { fname, lname, email, phone, password, address } = data
+        let { fname, lname, email, phone, password, address } = data
+       address = JSON.parse(address)
+
+
         if (!fname) return res.status(400).send({ status: false, message: "fname is requires" })
         if (!isValidName(fname.trim())) return res.status(400).send({ status: false, message: `${fname} is not a valide first name.` })
 
@@ -31,7 +34,7 @@ const userCreate = async function (req, res) {
 
 
         if (!phone) return res.status(400).send({ status: false, message: "phone is required" })
-        if (!isValidPhone(phone)) return res.status(400).send({ status: false, message: `${phone} is not a valide phone.` })
+        if (!isValidPhone(phone)) return res.status(400).send({ status: false, message: `${phone} is not a valide indian number .` })
         const isPhoneAlreadyUsed = await userModel.findOne({ phone })
         if (isPhoneAlreadyUsed) { return res.status(409).send({ status: false, message: `${phone} is already in use, Please try a new phone number.` }) }
 
@@ -49,9 +52,8 @@ const userCreate = async function (req, res) {
             if (!(address.shipping.pincode)) return res.status(400).send({ status: false, message: "Shipping address's pincode Required" })
             if (!isValidpincode(address.shipping.pincode)) return res.status(400).send({ status: false, message: "Shipping Pinecode is not valide" })
 
-        } else {
-            return res.status(400).send({ status: false, message: "Shipping address cannot be empty." })
-        }
+       } else return res.status(400).send({ status: false, message: "Shipping address cannot be empty." })
+        
         // Billing Address validation
 
         if (address.billing) {
@@ -60,8 +62,7 @@ const userCreate = async function (req, res) {
             if (!(address.shipping.pincode)) return res.status(400).send({ status: false, message: "billing address's pincode Required" })
             if (!isValidpincode(address.billing.pincode)) return res.status(400).send({ status: false, message: "billing Pinecode is not valide" })
 
-        } else
-            return res.status(400).send({ status: false, message: "Billing address cannot be empty." })
+        } else return res.status(400).send({ status: false, message: "Billing address cannot be empty." })
 
 
         if (files.length === 0) return res.status(400).send({ status: false, message: "Profile Image is mandatory" })
@@ -71,6 +72,8 @@ const userCreate = async function (req, res) {
         const encryptedPassword = await bcrypt.hash(password, 10) //encrypting password by using bcrypt.
 
         //object destructuring for response body.
+    
+        
         const userData = { fname, lname, email, profileImage, phone, password: encryptedPassword, address }
         const saveUserData = await userModel.create(userData);
         return res.status(201).send({ status: true, message: "user created successfully.", data: saveUserData });
